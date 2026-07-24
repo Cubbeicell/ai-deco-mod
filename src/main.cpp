@@ -18,9 +18,9 @@
 using namespace geode::prelude;
 using namespace cocos2d;
 
-// ═══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 //  BASE64
-// ═══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 
 static const std::string B64 =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -39,9 +39,9 @@ static std::string b64Encode(const unsigned char* d, size_t len) {
     return out;
 }
 
-// ═══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 //  SCREENSHOT
-// ═══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 
 struct Snap { std::string b64; bool ok = false; };
 
@@ -67,9 +67,9 @@ static Snap captureEditor() {
     return s;
 }
 
-// ═══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 //  CONSTANTS
-// ═══════════════════════════════════════════════════════════════════
+// ════════════════════════���═══════════════════════════════════════════════════
 
 static constexpr float GD_UNITS_PER_SEC = 311.f;  // Speed 1x
 static constexpr int   CONFIDENCE_WARN  = 70;
@@ -91,9 +91,9 @@ static const std::vector<std::pair<std::string, std::string>> PRESETS = {
     {"NATURE", "enchanted ancient forest - deep emerald greens and earthy browns, firefly glow particles, twisted vine and root silhouettes, warm dappled golden canopy light"},
 };
 
-// ═══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 //  GEMINI URL
-// ═══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 
 static const std::string GEMINI_URL =
     "https://generativelanguage.googleapis.com/v1beta/models/"
@@ -207,9 +207,9 @@ KEY RULES:
 )";
 }
 
-// ═══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 //  CHAT ENTRY
-// ═══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 
 struct ChatEntry {
     std::string sender;
@@ -217,9 +217,9 @@ struct ChatEntry {
     std::string timestamp;
 };
 
-// ═══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 //  AI DECO POPUP
-// ═══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 
 class AIDecoPopup : public FLAlertLayer {
 
@@ -252,7 +252,7 @@ class AIDecoPopup : public FLAlertLayer {
     std::vector<ChatEntry> m_chatHistory;
 
     // ── Network ──────────────────────────────────────────────────
-    EventListener<Task<web::WebResponse, web::WebProgress>> m_listener;
+    std::shared_ptr<Task<web::WebResponse, web::WebProgress>> m_listener;
 
     // ── Dimensions ───────────────────────────────────────────────
     static constexpr float PW     = 460.f;
@@ -261,7 +261,7 @@ class AIDecoPopup : public FLAlertLayer {
 
 protected:
     bool init() {
-        if (!FLAlertLayer::init(nullptr, "AI Deco Assistant", "Close", nullptr, PW))
+        if (!FLAlertLayer::init(nullptr, "AI Deco Assistant", "Close", nullptr, PW, false, PH, 0.8f))
             return false;
         m_mainLayer->removeAllChildren();
         buildUI();
@@ -326,7 +326,7 @@ protected:
                 "GJ_button_04.png", 0.4f);
             spr->setScale(0.65f);
             auto* btn = CCMenuItemSpriteExtra::create(
-                spr, this, menu_selector(AIDecoPopup::onPreset));
+                spr, spr, this, menu_selector(AIDecoPopup::onPreset));
             btn->setTag(i);
             btn->setPosition({16.f + i * gap + gap/2.f, 122.f});
             presetMenu->addChild(btn);
@@ -355,7 +355,7 @@ protected:
         auto* selSpr = ButtonSprite::create("SEL", "bigFont.fnt", "GJ_button_05.png", 0.5f);
         selSpr->setScale(0.60f);
         auto* selBtn = CCMenuItemSpriteExtra::create(
-            selSpr, this, menu_selector(AIDecoPopup::onUseSelection));
+            selSpr, selSpr, this, menu_selector(AIDecoPopup::onUseSelection));
         selBtn->setPosition({285.f, 104.f});
         selMenu->addChild(selBtn);
 
@@ -427,14 +427,14 @@ protected:
             // CONFIRM
             auto* cSpr = ButtonSprite::create("CONFIRM", "bigFont.fnt", "GJ_button_01.png", 0.6f);
             auto* cBtn = CCMenuItemSpriteExtra::create(
-                cSpr, this, menu_selector(AIDecoPopup::onConfirmPreview));
+                cSpr, cSpr, this, menu_selector(AIDecoPopup::onConfirmPreview));
             cBtn->setPosition({PW - 70.f, 50.f});
             m_actionMenu->addChild(cBtn);
 
             // REJECT
             auto* rSpr = ButtonSprite::create("REJECT", "bigFont.fnt", "GJ_button_06.png", 0.6f);
             auto* rBtn = CCMenuItemSpriteExtra::create(
-                rSpr, this, menu_selector(AIDecoPopup::onRejectPreview));
+                rSpr, rSpr, this, menu_selector(AIDecoPopup::onRejectPreview));
             rBtn->setPosition({PW - 70.f, 26.f});
             m_actionMenu->addChild(rBtn);
 
@@ -442,7 +442,7 @@ protected:
             // GO
             auto* goSpr = ButtonSprite::create("GO", "goldFont.fnt", "GJ_button_01.png", 1.f);
             auto* goBtn = CCMenuItemSpriteExtra::create(
-                goSpr, this, menu_selector(AIDecoPopup::onSend));
+                goSpr, goSpr, this, menu_selector(AIDecoPopup::onSend));
             goBtn->setPosition({PW - 42.f, 76.f});
             m_actionMenu->addChild(goBtn);
 
@@ -450,7 +450,7 @@ protected:
             auto* uSpr = ButtonSprite::create("UNDO", "bigFont.fnt", "GJ_button_06.png", 0.45f);
             uSpr->setScale(0.65f);
             auto* uBtn = CCMenuItemSpriteExtra::create(
-                uSpr, this, menu_selector(AIDecoPopup::onUndo));
+                uSpr, uSpr, this, menu_selector(AIDecoPopup::onUndo));
             uBtn->setPosition({PW - 42.f, 50.f});
             m_actionMenu->addChild(uBtn);
 
@@ -458,7 +458,7 @@ protected:
             auto* lSpr = ButtonSprite::create("LOG", "bigFont.fnt", "GJ_button_05.png", 0.4f);
             lSpr->setScale(0.60f);
             auto* lBtn = CCMenuItemSpriteExtra::create(
-                lSpr, this, menu_selector(AIDecoPopup::onExportChat));
+                lSpr, lSpr, this, menu_selector(AIDecoPopup::onExportChat));
             lBtn->setPosition({PW - 42.f, 28.f});
             m_actionMenu->addChild(lBtn);
 
@@ -468,7 +468,7 @@ protected:
                 m_ownedOnly ? "GJ_button_01.png" : "GJ_button_04.png", 0.38f);
             oSpr->setScale(0.60f);
             auto* oBtn = CCMenuItemSpriteExtra::create(
-                oSpr, this, menu_selector(AIDecoPopup::onToggleOwned));
+                oSpr, oSpr, this, menu_selector(AIDecoPopup::onToggleOwned));
             oBtn->setPosition({330.f, 28.f});
             m_actionMenu->addChild(oBtn);
 
@@ -478,7 +478,7 @@ protected:
                 m_previewMode ? "GJ_button_01.png" : "GJ_button_04.png", 0.38f);
             pSpr->setScale(0.60f);
             auto* pBtn = CCMenuItemSpriteExtra::create(
-                pSpr, this, menu_selector(AIDecoPopup::onTogglePreview));
+                pSpr, pSpr, this, menu_selector(AIDecoPopup::onTogglePreview));
             pBtn->setPosition({385.f, 28.f});
             m_actionMenu->addChild(pBtn);
         }
@@ -494,7 +494,7 @@ protected:
         lbl->setScale(0.38f);
         lbl->setColor(col);
         lbl->setAnchorPoint({0.f, 1.f});
-        lbl->setMaxLineWidth(PW - 52.f);
+        lbl->setWidth(PW - 52.f);
         lbl->setPosition({0.f, m_chatY});
         m_chatLayer->addChild(lbl);
         m_chatY -= (lbl->getContentSize().height * 0.38f + 5.f);
@@ -648,12 +648,12 @@ protected:
                   pass+1, passNames[pass]), {160,180,255});
 
         // Hide popup so it doesn't appear in screenshot
-        this->setVisible(false);
+        FLAlertLayer::setVisible(false);
 
         this->scheduleOnce([this, pass](float) {
-            auto snap = captureEditor();
-            this->setVisible(true);
+            FLAlertLayer::setVisible(true);
 
+            auto snap = captureEditor();
             if (!snap.ok) {
                 setStatus("Screenshot failed. Try again.", {255,80,80});
                 pushChat("AI: Screenshot error. Please retry.", {255,100,100});
@@ -679,32 +679,33 @@ protected:
             "\n\nDecoration request: " + m_currentPrompt;
 
         // Build multimodal content
-        auto imgSrc = matjson::Object();
+        matjson::Object imgSrc;
         imgSrc["type"]       = "base64";
         imgSrc["media_type"] = "image/png";
         imgSrc["data"]       = imgB64;
-        auto imgPart = matjson::Object();
+        
+        matjson::Object imgPart;
         imgPart["inline_data"] = imgSrc;
 
-        auto txtPart = matjson::Object();
+        matjson::Object txtPart;
         txtPart["text"] = fullText;
 
-        auto parts = matjson::Array();
+        matjson::Array parts;
         parts.push_back(imgPart);
         parts.push_back(txtPart);
 
-        auto content = matjson::Object();
+        matjson::Object content;
         content["parts"] = parts;
         content["role"]  = "user";
 
-        auto contents = matjson::Array();
+        matjson::Array contents;
         contents.push_back(content);
 
-        auto genCfg = matjson::Object();
+        matjson::Object genCfg;
         genCfg["temperature"]     = 0.75;
         genCfg["maxOutputTokens"] = 8192;
 
-        auto body = matjson::Object();
+        matjson::Object body;
         body["contents"]         = contents;
         body["generationConfig"] = genCfg;
 
@@ -712,7 +713,9 @@ protected:
         req.header("Content-Type", "application/json");
         req.bodyString(matjson::Value(body).dump());
 
-        m_listener.listen([this, pass](Task<web::WebResponse, web::WebProgress>::Event* e) {
+        m_listener = req.post(GEMINI_URL + "?key=" + m_currentApiKey);
+        
+        m_listener->listen([this, pass](auto* e) {
             if (auto* res = e->getValue()) {
                 std::string raw  = res->string().unwrap_or("");
                 int         code = res->code();
@@ -721,7 +724,6 @@ protected:
                 });
             }
         });
-        m_listener = req.post(GEMINI_URL + "?key=" + m_currentApiKey);
     }
 
     // ═════════════════════════════════════════════════════════════
@@ -1006,9 +1008,9 @@ public:
     }
 };
 
-// ═══════════════════════════════════════════════════════════════════
+// ═════════════════════════════════════════════════════════════════════════════
 //  EDITOR UI HOOK — adds the AI button
-// ═══════════════════════════════════════════════════════════════════
+// ═════════════════════════════════════════════════════════════════════════════
 
 class $modify(MyEditorUI, EditorUI) {
     bool init(LevelEditorLayer* lel) {
@@ -1022,7 +1024,7 @@ class $modify(MyEditorUI, EditorUI) {
             CircleBaseSize::Medium);
 
         auto* btn  = CCMenuItemSpriteExtra::create(
-            spr, this, menu_selector(MyEditorUI::onOpenAI));
+            spr, spr, this, menu_selector(MyEditorUI::onOpenAI));
         auto* menu = CCMenu::create();
         menu->addChild(btn);
         menu->setPosition({wsz.width - 48.f, wsz.height - 200.f});
